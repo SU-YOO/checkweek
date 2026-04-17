@@ -83,7 +83,7 @@ leaderName
 웹에서 제출하면 이 시트의 `A:D` 마지막 행에 아래 순서로 추가됩니다.
 
 ```text
-A: timestamp | B: leaderName | C: qtCount | D: bibleCount
+A: weekLabel | B: leaderName | C: qtCount | D: bibleCount
 ```
 
 ### `settings`
@@ -193,7 +193,7 @@ submissionMode: "apps-script"
 
 이 모드에서는 웹 제출값이 `설문지 응답 시트`에 아래 순서로 누적됩니다.
 
-- A열: 타임스탬프
+- A열: 현재 주차
 - B열: 성명
 - C열: Q.T 횟수
 - D열: 성경봉독 횟수

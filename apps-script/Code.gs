@@ -59,10 +59,11 @@ function doPost(e) {
 function saveSubmission(payload) {
   const sheet = getOrCreateSheet(SUBMISSION_APPEND_SHEET_NAME);
   const nextRow = getNextSubmissionRow_(sheet);
+  const weekLabel = String(payload.weekLabel || getCurrentWeekLabel_()).trim();
 
   sheet
     .getRange(nextRow, 1, 1, 4)
-    .setValues([[new Date(), payload.leaderName || '', payload.qtCount || 0, payload.bibleCount || 0]]);
+    .setValues([[weekLabel, payload.leaderName || '', payload.qtCount || 0, payload.bibleCount || 0]]);
 }
 
 function buildDashboardPayload() {
