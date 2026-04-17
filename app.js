@@ -1,5 +1,6 @@
 const CONFIG = {
   accessPasswords: ["김정우", "rlawjddn"],
+  enableRulePopup: false,
   apiBaseUrl: "https://script.google.com/macros/s/AKfycbwcIq_onPWz4I_GkSn6w0eT-NQ3pmjbXTrs99aHIqSe5LMiZnKpHemFudAoQs07rw-Duw/exec",
   submissionMode: "apps-script",
   googleForm: {
@@ -419,7 +420,9 @@ function bindEvents() {
   elements.devotionForm.addEventListener("submit", submitForm);
   elements.searchInput.addEventListener("input", () => renderTable(state.rows));
   elements.refreshButton.addEventListener("click", fetchDashboard);
-  elements.ruleOpenButton.addEventListener("click", openRuleModal);
+  if (CONFIG.enableRulePopup) {
+    elements.ruleOpenButton.addEventListener("click", openRuleModal);
+  }
   elements.ruleCloseButton.addEventListener("click", closeRuleModal);
   elements.accountToggleButton.addEventListener("click", toggleAccountInfo);
   elements.accountInfo.addEventListener("click", copyAccountInfo);
@@ -445,6 +448,7 @@ function bindEvents() {
 }
 
 function init() {
+  elements.ruleOpenButton.hidden = !CONFIG.enableRulePopup;
   populateCountOptions();
   renderMeta();
   bindEvents();
