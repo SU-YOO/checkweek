@@ -1,6 +1,6 @@
 const CONFIG = {
-  accessPasswords: ["김정우", "rlawjddn"],
-  enableRulePopup: false,
+  accessPasswords: ["김정우", "rlawjddn", "jungwoo", "kimjungwoo"],
+  enableRulePopup: true,
   apiBaseUrl: "https://script.google.com/macros/s/AKfycbwcIq_onPWz4I_GkSn6w0eT-NQ3pmjbXTrs99aHIqSe5LMiZnKpHemFudAoQs07rw-Duw/exec",
   submissionMode: "apps-script",
   googleForm: {
