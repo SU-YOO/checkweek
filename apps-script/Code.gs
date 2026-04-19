@@ -16,6 +16,7 @@ const EXISTING_CAMPUS_SHEET = {
     qtCount: 'Q.T',
     bibleCount: '말씀',
     attendanceTime: '토목 출석시간',
+    reason: '사유',
     lateFee: '지각비',
     fine: '벌금',
   },
@@ -126,6 +127,7 @@ function buildExistingCampusDashboardPayload_() {
     qtCount: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.qtCount),
     bibleCount: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.bibleCount),
     attendanceTime: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.attendanceTime),
+    reason: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.reason),
     lateFee: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.lateFee),
     fine: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.fine),
   };
@@ -161,6 +163,7 @@ function buildExistingCampusDashboardPayload_() {
     const qtValue = indexes.qtCount >= 0 ? row[indexes.qtCount] : '';
     const bibleValue = indexes.bibleCount >= 0 ? row[indexes.bibleCount] : '';
     const attendanceTime = indexes.attendanceTime >= 0 ? String(row[indexes.attendanceTime] || '').trim() : '';
+    const reason = indexes.reason >= 0 ? String(row[indexes.reason] || '').trim() : '';
     const lateFeeValue = indexes.lateFee >= 0 ? row[indexes.lateFee] : '';
     const fineValue = indexes.fine >= 0 ? row[indexes.fine] : '';
     const lateFee = parseWonValue_(lateFeeValue);
@@ -183,9 +186,12 @@ function buildExistingCampusDashboardPayload_() {
     });
     fineRows.push({
       name: name,
-      attendanceTime: attendanceTime || '-',
+      qtCount: normalizeCountValue_(qtValue),
+      bibleCount: normalizeCountValue_(bibleValue),
+      attendanceTime: attendanceTime || reason || '-',
       lateFee: lateFee,
       fine: fine,
+      submitted: submitted,
       isLateFeeApplied: Boolean(attendanceTime),
     });
   });
