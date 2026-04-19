@@ -608,12 +608,10 @@ async function shareFineImage() {
     }
 
     const file = new File([blob], "fine-summary.png", { type: "image/png" });
+    const sharePayload = { files: [file] };
 
-    if (navigator.canShare?.({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: "이번 주 벌금 내역",
-      });
+    if (navigator.canShare?.(sharePayload)) {
+      await navigator.share(sharePayload);
       return;
     }
 
