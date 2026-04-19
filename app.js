@@ -1,5 +1,5 @@
 const CONFIG = {
-  accessPasswords: ["김정우", "rlawjddn", "jungwoo", "kimjungwoo"],
+  accessPasswords: ["김정우", "rlawjddn", "jungwoo", "kimjungwoo", "jesus"],
   enableRulePopup: true,
   apiBaseUrl: "https://script.google.com/macros/s/AKfycbwcIq_onPWz4I_GkSn6w0eT-NQ3pmjbXTrs99aHIqSe5LMiZnKpHemFudAoQs07rw-Duw/exec",
   submissionMode: "apps-script",
@@ -49,6 +49,8 @@ const elements = {
   formMessage: document.querySelector("#formMessage"),
   searchInput: document.querySelector("#searchInput"),
   refreshButton: document.querySelector("#refreshButton"),
+  tabButtons: document.querySelectorAll("[data-view-target]"),
+  viewPanels: document.querySelectorAll("[data-view]"),
   totalFineAmount: document.querySelector("#totalFineAmount"),
   fineWarning: document.querySelector("#fineWarning"),
   fineTableBody: document.querySelector("#fineTableBody"),
@@ -90,6 +92,29 @@ function submitPassword(event) {
 
 function setLoading(isLoading) {
   elements.loadingBar.hidden = !isLoading;
+}
+
+function setActiveView(viewName, updateHash = true) {
+  const normalizedViewName = viewName === "fine" ? "fine" : "check";
+
+  elements.viewPanels.forEach((panel) => {
+    panel.hidden = panel.dataset.view !== normalizedViewName;
+  });
+
+  elements.tabButtons.forEach((button) => {
+    const isActive = button.dataset.viewTarget === normalizedViewName;
+    button.classList.toggle("active", isActive);
+    button.setAttribute("aria-pressed", String(isActive));
+  });
+
+  if (updateHash) {
+    const hash = normalizedViewName === "fine" ? "#fine" : "#check";
+    window.history.replaceState(null, "", hash);
+  }
+}
+
+function getViewFromHash() {
+  return window.location.hash === "#fine" ? "fine" : "check";
 }
 
 function populateCountOptions() {
@@ -503,6 +528,14 @@ function bindEvents() {
   elements.devotionForm.addEventListener("submit", submitForm);
   elements.searchInput.addEventListener("input", () => renderTable(state.rows));
   elements.refreshButton.addEventListener("click", fetchDashboard);
+  elements.tabButtons.forEach((button) => {
+    button.addEventListener("click", () => {
+      setActiveView(button.dataset.viewTarget);
+    });
+  });
+  window.addEventListener("hashchange", () => {
+    setActiveView(getViewFromHash(), false);
+  });
   if (CONFIG.enableRulePopup) {
     elements.ruleOpenButton.addEventListener("click", openRuleModal);
   }
@@ -532,6 +565,7 @@ function bindEvents() {
 
 function init() {
   elements.ruleOpenButton.hidden = !CONFIG.enableRulePopup;
+  setActiveView(getViewFromHash(), false);
   populateCountOptions();
   renderMeta();
   renderFineSummary();

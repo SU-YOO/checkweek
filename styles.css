@@ -297,8 +297,35 @@ h2 {
   gap: 24px;
 }
 
+.page-tabs {
+  display: inline-flex;
+  gap: 8px;
+  margin: 0 0 24px;
+  padding: 6px;
+  border-radius: 16px;
+  background: rgba(255, 251, 245, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 0 14px 36px rgba(71, 48, 27, 0.08);
+}
+
+.tab-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 11px 16px;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tab-button.active {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 10px 18px rgba(157, 92, 47, 0.18);
+}
+
 .fine-panel {
-  margin-top: 24px;
+  margin-top: 0;
 }
 
 .fine-total-box {
@@ -760,6 +787,20 @@ tbody tr:last-child td {
   .content-grid {
     gap: 18px;
     margin-top: 12px;
+  }
+
+  .page-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    width: 100%;
+    margin-bottom: 18px;
+    border-radius: 14px;
+  }
+
+  .tab-button {
+    padding: 10px 12px;
+    border-radius: 10px;
+    font-size: 0.88rem;
   }
 
   .eyebrow,
