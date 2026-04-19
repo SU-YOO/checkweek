@@ -428,15 +428,28 @@ body.fine-view .hero-card {
   position: sticky;
   top: 0;
   align-self: start;
-  max-height: 100vh;
   display: flex;
   flex-direction: column;
 }
 
-.dashboard-panel .table-wrap,
-.fine-panel .table-wrap {
+.dashboard-panel {
+  max-height: 100vh;
+}
+
+.fine-panel {
+  max-height: none;
+}
+
+.dashboard-panel .table-wrap {
   flex: 1 1 auto;
   max-height: calc(100vh - 236px);
+  overflow: auto;
+  overscroll-behavior: auto;
+}
+
+.fine-panel .table-wrap {
+  flex: 1 1 auto;
+  max-height: calc(400vh - 944px);
   overflow: auto;
   overscroll-behavior: auto;
 }
@@ -861,6 +874,10 @@ tbody tr:last-child td {
     overflow: auto;
   }
 
+  .fine-panel .table-wrap {
+    max-height: calc(400vh - 880px);
+  }
+
   .panel-description {
     max-width: none;
     font-size: 0.94rem;
@@ -1050,6 +1067,10 @@ tbody tr:last-child td {
   .fine-panel .table-wrap {
     max-height: calc(100vh - 230px);
     overflow: auto;
+  }
+
+  .fine-panel .table-wrap {
+    max-height: calc(400vh - 920px);
   }
 
   .fine-toolbar {
