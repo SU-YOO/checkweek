@@ -145,6 +145,42 @@
           </div>
         </section>
       </main>
+
+      <section class="panel fine-panel" aria-labelledby="fineSummaryTitle">
+        <div class="panel-header">
+          <div>
+            <p class="panel-kicker">Fine</p>
+            <h2 id="fineSummaryTitle">이번 주 총 벌금</h2>
+            <p class="panel-description">
+              벌금계산 시트의 벌금 합계와 지각비 적용 상태를 확인할 수 있습니다.
+            </p>
+          </div>
+          <div class="fine-total-box">
+            <span class="meta-label">총 벌금</span>
+            <strong id="totalFineAmount">0원</strong>
+          </div>
+        </div>
+
+        <p id="fineWarning" class="fine-warning" hidden></p>
+
+        <div class="table-wrap fine-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>이름</th>
+                <th>토목 출석시간</th>
+                <th>지각비</th>
+                <th>총 벌금</th>
+              </tr>
+            </thead>
+            <tbody id="fineTableBody">
+              <tr>
+                <td colspan="4" class="empty-state">아직 벌금 데이터를 불러오지 않았습니다.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
 
     <div id="ruleModal" class="rule-modal" hidden>

@@ -15,6 +15,9 @@ const EXISTING_CAMPUS_SHEET = {
   columnNames: {
     qtCount: 'Q.T',
     bibleCount: '말씀',
+    attendanceTime: '토목 출석시간',
+    lateFee: '지각비',
+    fine: '벌금',
   },
   nonSubmittedValues: ['미제출', ''],
 };
@@ -94,6 +97,7 @@ function buildExistingCampusDashboardPayload_() {
       lastUpdated: new Date().toISOString(),
       members: [],
       submissions: [],
+      fineSummary: buildEmptyFineSummary_(),
     };
   }
 
@@ -110,6 +114,7 @@ function buildExistingCampusDashboardPayload_() {
       lastUpdated: new Date().toISOString(),
       members: [],
       submissions: [],
+      fineSummary: buildEmptyFineSummary_(),
     };
   }
 
@@ -120,6 +125,9 @@ function buildExistingCampusDashboardPayload_() {
   const indexes = {
     qtCount: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.qtCount),
     bibleCount: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.bibleCount),
+    attendanceTime: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.attendanceTime),
+    lateFee: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.lateFee),
+    fine: headerRow.indexOf(EXISTING_CAMPUS_SHEET.columnNames.fine),
   };
 
   if (lastRow < EXISTING_CAMPUS_SHEET.dataStartRowNumber) {
@@ -129,6 +137,7 @@ function buildExistingCampusDashboardPayload_() {
       lastUpdated: new Date().toISOString(),
       members: [],
       submissions: [],
+      fineSummary: buildEmptyFineSummary_(),
     };
   }
 
@@ -138,6 +147,9 @@ function buildExistingCampusDashboardPayload_() {
     .getDisplayValues();
   const members = [];
   const submissions = [];
+  const fineRows = [];
+  const missingAttendanceNames = [];
+  var totalFine = 0;
 
   values.forEach(function (row) {
     const name = String(row[nameColumnIndex] || '').trim();
@@ -148,7 +160,18 @@ function buildExistingCampusDashboardPayload_() {
 
     const qtValue = indexes.qtCount >= 0 ? row[indexes.qtCount] : '';
     const bibleValue = indexes.bibleCount >= 0 ? row[indexes.bibleCount] : '';
+    const attendanceTime = indexes.attendanceTime >= 0 ? String(row[indexes.attendanceTime] || '').trim() : '';
+    const lateFeeValue = indexes.lateFee >= 0 ? row[indexes.lateFee] : '';
+    const fineValue = indexes.fine >= 0 ? row[indexes.fine] : '';
+    const lateFee = parseWonValue_(lateFeeValue);
+    const fine = parseWonValue_(fineValue);
     const submitted = isSubmittedValue_(qtValue) || isSubmittedValue_(bibleValue);
+
+    totalFine += fine;
+
+    if (!attendanceTime) {
+      missingAttendanceNames.push(name);
+    }
 
     members.push({ name: name });
     submissions.push({
@@ -158,6 +181,13 @@ function buildExistingCampusDashboardPayload_() {
       submittedAt: '',
       submitted: submitted,
     });
+    fineRows.push({
+      name: name,
+      attendanceTime: attendanceTime || '-',
+      lateFee: lateFee,
+      fine: fine,
+      isLateFeeApplied: Boolean(attendanceTime),
+    });
   });
 
   return {
@@ -166,6 +196,25 @@ function buildExistingCampusDashboardPayload_() {
     lastUpdated: new Date().toISOString(),
     members: members,
     submissions: submissions,
+    fineSummary: {
+      totalFine: totalFine,
+      hasAttendanceColumn: indexes.attendanceTime >= 0,
+      hasFineColumn: indexes.fine >= 0,
+      isLateFeeApplied: missingAttendanceNames.length === 0,
+      missingAttendanceNames: missingAttendanceNames,
+      rows: fineRows,
+    },
+  };
+}
+
+function buildEmptyFineSummary_() {
+  return {
+    totalFine: 0,
+    hasAttendanceColumn: true,
+    hasFineColumn: true,
+    isLateFeeApplied: true,
+    missingAttendanceNames: [],
+    rows: [],
   };
 }
 
@@ -314,6 +363,21 @@ function normalizeCountValue_(value) {
   }
 
   return normalized;
+}
+
+function parseWonValue_(value) {
+  if (typeof value === 'number') {
+    return value;
+  }
+
+  const normalized = String(value || '').replace(/[^\d.-]/g, '');
+  const parsed = Number(normalized);
+
+  if (Number.isNaN(parsed)) {
+    return 0;
+  }
+
+  return parsed;
 }
 
 function columnLetterToIndex_(columnLetter) {

@@ -23,6 +23,7 @@ const state = {
   weekLabel: "",
   rows: [],
   members: [],
+  fineSummary: null,
   isAuthenticated: false,
 };
 
@@ -48,9 +49,21 @@ const elements = {
   formMessage: document.querySelector("#formMessage"),
   searchInput: document.querySelector("#searchInput"),
   refreshButton: document.querySelector("#refreshButton"),
+  totalFineAmount: document.querySelector("#totalFineAmount"),
+  fineWarning: document.querySelector("#fineWarning"),
+  fineTableBody: document.querySelector("#fineTableBody"),
   leaderName: document.querySelector("#leaderName"),
   qtCount: document.querySelector("#qtCount"),
   bibleCount: document.querySelector("#bibleCount"),
+};
+
+const emptyFineSummary = {
+  totalFine: 0,
+  hasAttendanceColumn: true,
+  hasFineColumn: true,
+  isLateFeeApplied: true,
+  missingAttendanceNames: [],
+  rows: [],
 };
 
 function unlockPage() {
@@ -144,6 +157,16 @@ function formatDateTime(value) {
     dateStyle: "short",
     timeStyle: "short",
   }).format(date);
+}
+
+function formatWon(value) {
+  const amount = Number(value) || 0;
+
+  return new Intl.NumberFormat("ko-KR", {
+    style: "currency",
+    currency: "KRW",
+    maximumFractionDigits: 0,
+  }).format(amount);
 }
 
 function normalizeRows(payload = {}) {
@@ -256,6 +279,60 @@ function renderTable(rows) {
   updateSummary(rows);
 }
 
+function renderFineSummary(summary = emptyFineSummary) {
+  const fineSummary = {
+    ...emptyFineSummary,
+    ...summary,
+    rows: Array.isArray(summary.rows) ? summary.rows : [],
+    missingAttendanceNames: Array.isArray(summary.missingAttendanceNames)
+      ? summary.missingAttendanceNames
+      : [],
+  };
+
+  elements.totalFineAmount.textContent = formatWon(fineSummary.totalFine);
+
+  if (!fineSummary.hasFineColumn) {
+    elements.fineWarning.hidden = false;
+    elements.fineWarning.textContent = "벌금계산 시트에서 벌금 열을 찾지 못했습니다.";
+  } else if (!fineSummary.hasAttendanceColumn) {
+    elements.fineWarning.hidden = false;
+    elements.fineWarning.textContent = "벌금계산 시트에서 토목 출석시간 열을 찾지 못했습니다.";
+  } else if (!fineSummary.isLateFeeApplied) {
+    const names = fineSummary.missingAttendanceNames.slice(0, 6).join(", ");
+    const suffix = fineSummary.missingAttendanceNames.length > 6 ? " 외" : "";
+    elements.fineWarning.hidden = false;
+    elements.fineWarning.textContent = `토목 출석시간이 비어 있어 지각비 적용이 안되어있습니다: ${names}${suffix}`;
+  } else {
+    elements.fineWarning.hidden = true;
+    elements.fineWarning.textContent = "";
+  }
+
+  if (!fineSummary.rows.length) {
+    elements.fineTableBody.innerHTML =
+      '<tr><td colspan="4" class="empty-state">표시할 벌금 데이터가 없습니다.</td></tr>';
+    return;
+  }
+
+  elements.fineTableBody.innerHTML = fineSummary.rows
+    .map(
+      (row) => `
+        <tr>
+          <td>${row.name}</td>
+          <td>
+            ${
+              row.isLateFeeApplied
+                ? row.attendanceTime
+                : '<span class="status-badge pending">지각비 미적용</span>'
+            }
+          </td>
+          <td>${formatWon(row.lateFee)}</td>
+          <td><strong>${formatWon(row.fine)}</strong></td>
+        </tr>
+      `,
+    )
+    .join("");
+}
+
 async function fetchDashboard() {
   if (!state.isAuthenticated) {
     return;
@@ -266,8 +343,10 @@ async function fetchDashboard() {
   if (!CONFIG.apiBaseUrl || CONFIG.apiBaseUrl.includes("YOUR_APPS_SCRIPT")) {
     state.weekLabel = fallbackWeek;
     state.rows = normalizeRows({});
+    state.fineSummary = emptyFineSummary;
     renderMeta();
     renderTable(state.rows);
+    renderFineSummary(state.fineSummary);
     setMessage("Apps Script URL을 연결하면 실제 스프레드시트 데이터가 표시됩니다.");
     return;
   }
@@ -286,14 +365,18 @@ async function fetchDashboard() {
     const payload = await response.json();
     state.weekLabel = payload.weekLabel || fallbackWeek;
     state.rows = normalizeRows(payload);
+    state.fineSummary = payload.fineSummary || emptyFineSummary;
     renderMeta(payload.lastUpdated);
     renderTable(state.rows);
+    renderFineSummary(state.fineSummary);
   } catch (error) {
     console.error(error);
     state.weekLabel = fallbackWeek;
     state.rows = normalizeRows({});
+    state.fineSummary = emptyFineSummary;
     renderMeta();
     renderTable(state.rows);
+    renderFineSummary(state.fineSummary);
     setMessage("실시간 데이터를 가져오지 못해 예시 데이터로 표시 중입니다.", "error");
   } finally {
     elements.refreshButton.disabled = false;
@@ -451,6 +534,7 @@ function init() {
   elements.ruleOpenButton.hidden = !CONFIG.enableRulePopup;
   populateCountOptions();
   renderMeta();
+  renderFineSummary();
   bindEvents();
   elements.passwordInput.focus();
 }

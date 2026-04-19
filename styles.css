@@ -297,6 +297,41 @@ h2 {
   gap: 24px;
 }
 
+.fine-panel {
+  margin-top: 24px;
+}
+
+.fine-total-box {
+  min-width: 180px;
+  padding: 18px;
+  border-radius: 18px;
+  background: rgba(157, 92, 47, 0.1);
+  color: var(--primary-deep);
+  text-align: right;
+}
+
+.fine-total-box strong {
+  display: block;
+  margin-top: 6px;
+  font-size: clamp(1.6rem, 3vw, 2.3rem);
+  line-height: 1;
+}
+
+.fine-warning {
+  margin: 20px 0 0;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: rgba(165, 61, 45, 0.1);
+  color: #a53d2d;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.fine-table-wrap {
+  margin-top: 20px;
+  max-height: 420px;
+}
+
 .panel {
   padding: 28px;
 }
@@ -787,6 +822,11 @@ tbody tr:last-child td {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+  }
+
+  .fine-total-box {
+    min-width: 0;
+    text-align: left;
   }
 
   .panel-header > div:first-child {
