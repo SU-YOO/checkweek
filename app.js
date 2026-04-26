@@ -1,5 +1,5 @@
 const CONFIG = {
-  accessPasswords: ["김정우", "rlawjddn", "jungwoo", "kimjungwoo", "jesus"],
+  accessPasswords: ["jesus"],
   enableRulePopup: true,
   apiBaseUrl: "https://script.google.com/macros/s/AKfycbwcIq_onPWz4I_GkSn6w0eT-NQ3pmjbXTrs99aHIqSe5LMiZnKpHemFudAoQs07rw-Duw/exec",
   submissionMode: "apps-script",
@@ -43,6 +43,7 @@ const elements = {
   ruleCloseButton: document.querySelector("#ruleCloseButton"),
   accountToggleButton: document.querySelector("#accountToggleButton"),
   accountInfo: document.querySelector("#accountInfo"),
+  accountCopyHint: document.querySelector("#accountCopyHint"),
   formWeekPill: document.querySelector("#formWeekPill"),
   leaderTableBody: document.querySelector("#leaderTableBody"),
   devotionForm: document.querySelector("#devotionForm"),
@@ -74,6 +75,58 @@ const emptyFineSummary = {
 
 const FINE_ADMIN_KEYWORD = "파수꾼";
 let isSharingFineImage = false;
+let toastHideTimer = 0;
+
+function ensureToastElement() {
+  let toast = document.querySelector("#copyToast");
+
+  if (toast) {
+    return toast;
+  }
+
+  toast = document.createElement("div");
+  toast.id = "copyToast";
+  toast.setAttribute("role", "status");
+  toast.setAttribute("aria-live", "polite");
+  Object.assign(toast.style, {
+    position: "fixed",
+    left: "50%",
+    bottom: "24px",
+    transform: "translate(-50%, 16px)",
+    maxWidth: "calc(100vw - 32px)",
+    padding: "12px 16px",
+    borderRadius: "8px",
+    background: "rgba(43, 36, 29, 0.94)",
+    color: "#fffaf2",
+    fontSize: "0.95rem",
+    fontWeight: "700",
+    lineHeight: "1.4",
+    textAlign: "center",
+    boxShadow: "0 14px 28px rgba(43, 36, 29, 0.24)",
+    opacity: "0",
+    pointerEvents: "none",
+    zIndex: "9999",
+    transition: "opacity 160ms ease, transform 160ms ease",
+  });
+  document.body.appendChild(toast);
+
+  return toast;
+}
+
+function showToast(message, type = "success") {
+  const toast = ensureToastElement();
+
+  toast.textContent = message;
+  toast.style.background = type === "error" ? "rgba(165, 61, 45, 0.96)" : "rgba(43, 36, 29, 0.94)";
+  toast.style.opacity = "1";
+  toast.style.transform = "translate(-50%, 0)";
+
+  window.clearTimeout(toastHideTimer);
+  toastHideTimer = window.setTimeout(() => {
+    toast.style.opacity = "0";
+    toast.style.transform = "translate(-50%, 16px)";
+  }, 1800);
+}
 
 function unlockPage() {
   state.isAuthenticated = true;
@@ -159,6 +212,7 @@ function closeRuleModal() {
 function toggleAccountInfo() {
   const isHidden = elements.accountInfo.hidden;
   elements.accountInfo.hidden = !isHidden;
+  elements.accountCopyHint.hidden = !isHidden;
   elements.accountToggleButton.setAttribute("aria-expanded", String(isHidden));
 }
 
@@ -172,9 +226,11 @@ async function copyAccountInfo() {
   try {
     await navigator.clipboard.writeText(text);
     setMessage("벌금 계좌가 복사되었습니다.", "success");
+    showToast("클립보드에 복사되었습니다.");
   } catch (error) {
     console.error(error);
     setMessage("클립보드 복사에 실패했습니다. 길게 눌러 복사해 주세요.", "error");
+    showToast("복사에 실패했습니다. 길게 눌러 복사해 주세요.", "error");
   }
 }
 

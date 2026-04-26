@@ -29,6 +29,7 @@ const FORM_COLUMNS = {
   qtCount: 4,
   bibleCount: 5,
 };
+const MAKEUP_LATE_REASON_KEYWORD = '보강 지각';
 
 function doGet(e) {
   const action = e && e.parameter ? e.parameter.action : '';
@@ -169,6 +170,7 @@ function buildExistingCampusDashboardPayload_() {
     const lateFee = parseWonValue_(lateFeeValue);
     const fine = parseWonValue_(fineValue);
     const submitted = isSubmittedValue_(qtValue) || isSubmittedValue_(bibleValue);
+    const attendanceDisplay = getAttendanceDisplayText_(attendanceTime, reason);
 
     totalFine += fine;
 
@@ -188,7 +190,7 @@ function buildExistingCampusDashboardPayload_() {
       name: name,
       qtCount: normalizeCountValue_(qtValue),
       bibleCount: normalizeCountValue_(bibleValue),
-      attendanceTime: attendanceTime || reason || '-',
+      attendanceTime: attendanceDisplay,
       lateFee: lateFee,
       fine: fine,
       submitted: submitted,
@@ -211,6 +213,14 @@ function buildExistingCampusDashboardPayload_() {
       rows: fineRows,
     },
   };
+}
+
+function getAttendanceDisplayText_(attendanceTime, reason) {
+  if (reason && reason.indexOf(MAKEUP_LATE_REASON_KEYWORD) !== -1) {
+    return MAKEUP_LATE_REASON_KEYWORD;
+  }
+
+  return attendanceTime || reason || '-';
 }
 
 function buildEmptyFineSummary_() {
